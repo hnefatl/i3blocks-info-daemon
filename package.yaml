@@ -1,0 +1,53 @@
+name:                i3blocks-info-daemon
+version:             0.1.0.0
+github:              "hnefatl/i3blocks-info-daemon"
+license:             BSD3
+author:              "Keith Collister"
+maintainer:          "hnefatl@gmail.com"
+copyright:           "2019 Keith Collister"
+
+extra-source-files:
+- README.md
+
+# Metadata used when publishing your package
+# synopsis:            Short description of your package
+# category:            Web
+
+description:         Please see the README on GitHub at <https://github.com/hnefatl/i3blocks-info-daemon#readme>
+
+dependencies:
+- base >= 4.7 && < 5
+
+default-extensions:
+  - NoImplicitPrelude
+  - OverloadedStrings
+
+executables:
+  i3blocks-info-daemon:
+    main:                Main.hs
+    source-dirs:         app
+    ghc-options:
+    - -threaded
+    - -rtsopts
+    - -with-rtsopts=-N
+    dependencies:
+    - basic-prelude
+    - mtl
+    - data-default
+    - daemons
+    - cereal
+    - cereal-text
+    - statgrab
+    - process
+    - text
+    - regex-pcre
+
+tests:
+  i3blocks-info-daemon-test:
+    main:                Spec.hs
+    source-dirs:         test
+    ghc-options:
+    - -threaded
+    - -rtsopts
+    - -with-rtsopts=-N
+    dependencies: []

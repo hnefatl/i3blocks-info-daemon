@@ -10,6 +10,7 @@ import System.Daemon (DaemonOptions(..), PidFile(InHome), ensureDaemonRunning, r
 import Data.Serialize (Serialize)
 import Data.Serialize.Text ()
 
+import Common (Result, performResult)
 import Battery (execBattery)
 
 data Arg = Usage
@@ -45,9 +46,9 @@ main = do
         Command c -> do
             let options = DaemonOptions port InHome False
             ensureDaemonRunning "i3blocks-info-daemon" options daemonProcess
-            putStrLn =<< handleCommand c
+            performResult =<< handleCommand c
 
-handleCommand :: Command -> IO Text
+handleCommand :: Command -> IO Result
 handleCommand Battery = execBattery
 handleCommand (Remote c) = runClient "localhost" port c >>= \case
     Nothing -> error ""

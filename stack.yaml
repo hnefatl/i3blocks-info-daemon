@@ -48,6 +48,7 @@ nix:
   - libstatgrab
   - pcre
   - acpi
+  - bluez
 
 # Override default flag values for local packages and extra-deps
 # flags: {}

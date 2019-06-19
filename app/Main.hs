@@ -13,11 +13,13 @@ import Data.Serialize.Text ()
 
 import Common (Result, Trigger, performResult, getTrigger)
 import Battery (execBattery)
+import Bluetooth (execBluetooth)
 
 data Arg = Usage
          | Command Command
          deriving (Eq, Ord, Show)
 data Command = Battery
+             | Bluetooth
              | CPU
              | Memory
              | Remote RemoteCommand
@@ -32,6 +34,7 @@ port = 10059
 parse :: [Text] -> Arg
 parse ["--help"] = Usage
 parse ["battery"] = Command Battery
+parse ["bluetooth"] = Command Bluetooth
 parse ["cpu"] = Command CPU
 parse ["memory"] = Command Memory
 parse _ = Usage
@@ -53,6 +56,7 @@ main = do
 
 handleCommand :: Command -> Trigger -> IO Result
 handleCommand Battery t = execBattery t
+handleCommand Bluetooth t = execBluetooth t
 handleCommand (Remote c) trigger = runClient "localhost" port (c, trigger) >>= \case
     Nothing -> error ""
     Just t -> return t

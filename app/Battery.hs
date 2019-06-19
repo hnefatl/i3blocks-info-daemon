@@ -1,3 +1,5 @@
+{-# Language MultiWayIf #-}
+
 module Battery where
 
 import BasicPrelude
@@ -7,8 +9,8 @@ import Text.Regex.PCRE ((=~), getAllTextSubmatches, AllTextSubmatches)
 
 import Common
 
-execBattery :: IO Result
-execBattery = do
+execBattery :: Trigger -> IO Result
+execBattery _ = do
     output <- readProcess "acpi" ["-b"] ""
     let pattern = "Battery 0: (\\w+), (\\d+)%, (\\d\\d):(\\d\\d):(\\d\\d)" :: String
     return $ case map pack $ getAllTextSubmatches (output =~ pattern :: AllTextSubmatches [] String) of
@@ -17,18 +19,14 @@ execBattery = do
         s -> resultPrintFailed (unlines s)
 
 makeResult :: Text -> Int -> Int -> Int -> Int -> Result
-makeResult status percent hours minutes seconds = defaultResult
-    { text = prefix <> " " <> tshow percent <> "%"
+makeResult "Charging" percent hours minutes seconds = resultPrintOkay $ "CHR " <> tshow percent <> "%"
+makeResult "Discharging" percent hours minutes seconds = defaultResult
+    { text = "DIS " <> tshow percent <> "%"
     , foreColour = colour }
-    where prefix = case status of
-            "Discharging" -> "DIS"
-            "Charging" -> "CHR"
-            _ -> ""
-          colour = case status of
-            "Discharging"
-                | percent < 20 -> Just "#FF0000"
-                | percent < 40 -> Just "#FFAE00"
-                | percent < 60 -> Just "#FFF600"
-                | percent < 85 -> Just "#A8FF00"
-                | otherwise    -> Nothing
-            _ -> Nothing
+    where colour = if
+            | percent < 20 -> Just "#FF0000"
+            | percent < 40 -> Just "#FFAE00"
+            | percent < 60 -> Just "#FFF600"
+            | percent < 85 -> Just "#A8FF00"
+            | otherwise    -> Nothing
+makeResult _ percent hours minutes seconds = resultPrintOkay $ tshow percent <> "%"

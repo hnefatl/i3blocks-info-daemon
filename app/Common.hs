@@ -4,10 +4,28 @@
 module Common where
 
 import BasicPrelude
+import GHC.Generics (Generic)
 import Data.Functor ((<&>))
+import Data.Text (pack)
 import Data.Serialize (Serialize, put, get)
 import Data.Serialize.Text ()
 import System.Exit (ExitCode(..), exitWith)
+import System.Environment (lookupEnv)
+
+data Trigger = Timer
+             | LeftMouse
+             | MiddleMouse
+             | RightMouse
+             deriving (Eq, Ord, Show, Generic)
+instance Serialize Trigger
+
+getTrigger :: IO (Either Text Trigger)
+getTrigger = lookupEnv "BLOCK_BUTTON" <&> \case
+    Nothing -> Right Timer
+    Just "1" -> Right LeftMouse
+    Just "2" -> Right MiddleMouse
+    Just "3" -> Right RightMouse
+    Just s -> Left $ "Unknown value for environment variable BLOCK_BUTTON: " <> pack s
 
 type Colour = Text
 

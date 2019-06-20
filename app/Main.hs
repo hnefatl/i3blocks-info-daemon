@@ -52,7 +52,7 @@ main = do
             let options = DaemonOptions port InHome False
             ensureDaemonRunning "i3blocks-info-daemon" options daemonProcess
             performResult =<< handleCommand c t
-        (_, Left triggerErr) -> putStrLn triggerErr >> exitWith (ExitFailure 1)
+        (_, Left triggerErr) -> putStrLn triggerErr >> exitWith (ExitFailure 48)
 
 handleCommand :: Command -> Trigger -> IO Result
 handleCommand Battery t = execBattery t

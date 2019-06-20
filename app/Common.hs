@@ -1,18 +1,18 @@
-{-# Language DeriveGeneric #-}
-{-# Language LambdaCase #-}
+{-# LANGUAGE DeriveGeneric #-}
+{-# LANGUAGE LambdaCase    #-}
 
 module Common where
 
-import BasicPrelude
-import GHC.Generics (Generic)
-import Data.Functor ((<&>))
-import Data.Text (pack)
-import Data.Serialize (Serialize, put, get)
-import Data.Serialize.Text ()
-import System.Exit (ExitCode(..), exitWith)
-import System.Environment (lookupEnv)
-import Options.Applicative (Parser, Mod, CommandFields)
-import qualified Data.Map.Strict as M
+import           BasicPrelude
+import           Data.Functor        ((<&>))
+import qualified Data.Map.Strict     as M
+import           Data.Serialize      (Serialize, get, put)
+import           Data.Serialize.Text ()
+import           Data.Text           (pack)
+import           GHC.Generics        (Generic)
+import           Options.Applicative (CommandFields, Mod, Parser)
+import           System.Environment  (lookupEnv)
+import           System.Exit         (ExitCode (..), exitWith)
 
 -- Run the command in the client program or in the daemon
 data RunType = Client | Daemon
@@ -39,7 +39,7 @@ getTrigger = lookupEnv "button" <&> \case
 type Colour = Text
 
 data Result = Result
-    { text :: Text
+    { text       :: Text
     , foreColour :: Maybe Colour
     , backColour :: Maybe Colour
     , exitStatus :: ExitCode }
@@ -50,7 +50,7 @@ instance Serialize Result where
         put $ foreColour r
         put $ backColour r
         put $ case exitStatus r of
-            ExitSuccess -> Nothing
+            ExitSuccess   -> Nothing
             ExitFailure i -> Just i
     get = Result <$> get <*> get <*> get <*> getStatusCode
         where getStatusCode = get <&> \case

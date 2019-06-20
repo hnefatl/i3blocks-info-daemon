@@ -1,16 +1,18 @@
-{-# Language LambdaCase #-}
+{-# LANGUAGE LambdaCase #-}
 
 module Bluetooth (export) where
 
-import BasicPrelude
+import           BasicPrelude
 
-import System.Process (readProcess, readProcessWithExitCode, spawnProcess)
-import System.Exit (ExitCode(..))
-import Text.Regex.PCRE ((=~), getAllTextSubmatches, AllTextSubmatches)
-import Options.Applicative
-import qualified Data.Map.Strict as M
+import qualified Data.Map.Strict     as M
+import           Options.Applicative
+import           System.Exit         (ExitCode (..))
+import           System.Process      (readProcess, readProcessWithExitCode,
+                                      spawnProcess)
+import           Text.Regex.PCRE     (AllTextSubmatches, getAllTextSubmatches,
+                                      (=~))
 
-import Common
+import           Common
 
 export :: ExportType
 export = (M.singleton "bluetooth" (Client, execBluetooth), parseBluetooth)

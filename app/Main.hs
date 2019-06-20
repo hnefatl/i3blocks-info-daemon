@@ -1,20 +1,23 @@
-{-# Language LambdaCase #-}
+{-# LANGUAGE LambdaCase #-}
 
 module Main where
 
-import BasicPrelude hiding (group)
-import Data.Default (def)
-import GHC.Generics (Generic)
-import System.Daemon (DaemonOptions(..), PidFile(InHome), ensureDaemonRunning, runClient)
-import System.Exit (ExitCode(ExitFailure), exitWith)
-import Data.Serialize (Serialize)
-import Data.Serialize.Text ()
-import Options.Applicative
-import qualified Data.Map.Strict as M
+import           BasicPrelude        hiding (group)
+import           Data.Default        (def)
+import qualified Data.Map.Strict     as M
+import           Data.Serialize      (Serialize)
+import           Data.Serialize.Text ()
+import           GHC.Generics        (Generic)
+import           Options.Applicative
+import           System.Daemon       (DaemonOptions (..), PidFile (InHome),
+                                      ensureDaemonRunning, runClient)
+import           System.Exit         (ExitCode (ExitFailure), exitWith)
 
-import Common (ExportType, Command, CommandParser, RunType(..), Result, Trigger, performResult, resultPrintFailed, getTrigger)
 import qualified Battery
 import qualified Bluetooth
+import           Common              (Command, CommandParser, ExportType,
+                                      Result, RunType (..), Trigger, getTrigger,
+                                      performResult, resultPrintFailed)
 
 commands :: [ExportType]
 commands = [ Bluetooth.export

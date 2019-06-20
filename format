@@ -1,0 +1,5 @@
+#!/usr/bin/env bash
+
+shopt -s globstar
+
+stack exec stylish-haskell -- --inplace app/**/*.hs

@@ -1,15 +1,16 @@
-{-# Language MultiWayIf #-}
+{-# LANGUAGE MultiWayIf #-}
 
-module Battery where
+module Battery (export) where
 
-import BasicPrelude
-import Data.Text (pack)
-import System.Process (readProcess, shell)
-import Text.Regex.PCRE ((=~), getAllTextSubmatches, AllTextSubmatches)
-import Options.Applicative
-import qualified Data.Map.Strict as M
+import           BasicPrelude
+import qualified Data.Map.Strict     as M
+import           Data.Text           (pack)
+import           Options.Applicative
+import           System.Process      (readProcess, shell)
+import           Text.Regex.PCRE     (AllTextSubmatches, getAllTextSubmatches,
+                                      (=~))
 
-import Common
+import           Common
 
 export :: ExportType
 export = (M.singleton "battery" (Client, execBattery), parseBattery)

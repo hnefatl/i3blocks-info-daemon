@@ -11,6 +11,15 @@ import Data.Serialize (Serialize, put, get)
 import Data.Serialize.Text ()
 import System.Exit (ExitCode(..), exitWith)
 import System.Environment (lookupEnv)
+import Options.Applicative (Parser, Mod, CommandFields)
+import qualified Data.Map.Strict as M
+
+-- Run the command in the client program or in the daemon
+data RunType = Client | Daemon
+
+type Command = Text
+type CommandParser = Mod CommandFields Command
+type ExportType = (M.Map Command (RunType, Trigger -> IO Result), CommandParser)
 
 data Trigger = Timer
              | LeftMouse
@@ -25,7 +34,7 @@ getTrigger = lookupEnv "button" <&> \case
     Just "1" -> Right LeftMouse
     Just "2" -> Right MiddleMouse
     Just "3" -> Right RightMouse
-    Just s -> Left $ "Unknown value for environment variable BLOCK_BUTTON: '" <> pack s <> "'"
+    Just s -> Left $ "Unknown value for environment variable 'button': '" <> pack s <> "'"
 
 type Colour = Text
 

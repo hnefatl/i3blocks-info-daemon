@@ -6,8 +6,16 @@ import BasicPrelude
 import Data.Text (pack)
 import System.Process (readProcess, shell)
 import Text.Regex.PCRE ((=~), getAllTextSubmatches, AllTextSubmatches)
+import Options.Applicative
+import qualified Data.Map.Strict as M
 
 import Common
+
+export :: ExportType
+export = (M.singleton "battery" (Client, execBattery), parseBattery)
+
+parseBattery :: CommandParser
+parseBattery = command "battery" (info (pure "battery") mempty)
 
 execBattery :: Trigger -> IO Result
 execBattery _ = do

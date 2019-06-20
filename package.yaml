@@ -41,6 +41,8 @@ executables:
     - process
     - text
     - regex-pcre
+    - optparse-applicative
+    - containers
 
 tests:
   i3blocks-info-daemon-test:

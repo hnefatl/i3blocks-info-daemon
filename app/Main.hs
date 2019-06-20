@@ -1,4 +1,3 @@
-{-# Language DeriveGeneric #-}
 {-# Language LambdaCase #-}
 
 module Main where
@@ -10,56 +9,48 @@ import System.Daemon (DaemonOptions(..), PidFile(InHome), ensureDaemonRunning, r
 import System.Exit (ExitCode(ExitFailure), exitWith)
 import Data.Serialize (Serialize)
 import Data.Serialize.Text ()
+import Options.Applicative
+import qualified Data.Map.Strict as M
 
-import Common (Result, Trigger, performResult, getTrigger)
-import Battery (execBattery)
-import Bluetooth (execBluetooth)
+import Common (ExportType, Command, CommandParser, RunType(..), Result, Trigger, performResult, resultPrintFailed, getTrigger)
+import qualified Battery
+import qualified Bluetooth
 
-data Arg = Usage
-         | Command Command
-         deriving (Eq, Ord, Show)
-data Command = Battery
-             | Bluetooth
-             | CPU
-             | Memory
-             | Remote RemoteCommand
-             deriving (Eq, Ord, Show)
-data RemoteCommand = Stub
-    deriving (Eq, Ord, Show, Generic)
-instance Serialize RemoteCommand
+commands :: [ExportType]
+commands = [ Bluetooth.export
+           , Battery.export ]
+
+handlers :: M.Map Command (RunType, Trigger -> IO Result)
+handlers = M.unions $ map fst commands
 
 port :: Int
 port = 10059
 
-parse :: [Text] -> Arg
-parse ["--help"] = Usage
-parse ["battery"] = Command Battery
-parse ["bluetooth"] = Command Bluetooth
-parse ["cpu"] = Command CPU
-parse ["memory"] = Command Memory
-parse _ = Usage
-
-usageText :: Text
-usageText = "Usage: 'i3blocks-info-daemon [--help] <battery|cpu|memory>'"
+parse :: IO Command
+parse = execParser $ info (parser <**> helper) (progDesc desc)
+    where parser = subparser $ mconcat $ map snd commands
+          desc = "Compute block text for i3blocks."
 
 main :: IO ()
 main = do
-    arg <- parse <$> getArgs
+    command <- parse
     trigger <- getTrigger
-    case (arg, trigger) of
-        (Usage, _) -> putStrLn usageText
-        (Command c, Right t) -> do
+    case trigger of
+        Right t -> do
             let options = DaemonOptions port InHome False
             ensureDaemonRunning "i3blocks-info-daemon" options daemonProcess
-            performResult =<< handleCommand c t
-        (_, Left triggerErr) -> putStrLn triggerErr >> exitWith (ExitFailure 48)
+            performResult =<< handleCommand command t
+        Left triggerErr -> putStrLn triggerErr >> exitWith (ExitFailure 48)
 
 handleCommand :: Command -> Trigger -> IO Result
-handleCommand Battery t = execBattery t
-handleCommand Bluetooth t = execBluetooth t
-handleCommand (Remote c) trigger = runClient "localhost" port (c, trigger) >>= \case
-    Nothing -> error ""
-    Just t -> return t
+handleCommand c t = case M.lookup c handlers of
+    Just (Client, handler) -> handler t
+    Just (Daemon, _) -> runClient "localhost" port (c, t) >>= \case
+        Nothing -> putStrLn "No response from daemon" >> exitWith (ExitFailure 47)
+        Just result -> return result
+    Nothing -> (putStrLn $ "No handler found for command '" <> c <> "'") >> exitWith (ExitFailure 47)
 
-daemonProcess :: (RemoteCommand, Trigger) -> IO Text
-daemonProcess _ = undefined
+daemonProcess :: (Command, Trigger) -> IO Result
+daemonProcess (c, t) = case M.lookup c handlers of
+    Just (_, handler) -> handler t
+    Nothing -> return $ resultPrintFailed $ "No handler found on daemon for '" <> c <>  "'"

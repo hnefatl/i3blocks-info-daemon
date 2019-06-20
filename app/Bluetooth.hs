@@ -1,14 +1,22 @@
 {-# Language LambdaCase #-}
 
-module Bluetooth where
+module Bluetooth (export) where
 
 import BasicPrelude
 
 import System.Process (readProcess, readProcessWithExitCode, spawnProcess)
 import System.Exit (ExitCode(..))
 import Text.Regex.PCRE ((=~), getAllTextSubmatches, AllTextSubmatches)
+import Options.Applicative
+import qualified Data.Map.Strict as M
 
 import Common
+
+export :: ExportType
+export = (M.singleton "bluetooth" (Client, execBluetooth), parseBluetooth)
+
+parseBluetooth :: CommandParser
+parseBluetooth = command "bluetooth" (info (pure "bluetooth") mempty)
 
 execBluetooth :: Trigger -> IO Result
 execBluetooth trigger = do

@@ -15,13 +15,15 @@ import           System.Exit         (ExitCode (ExitFailure), exitWith)
 
 import qualified Battery
 import qualified Bluetooth
+import qualified Cpu
 import           Common              (Command, CommandParser, ExportType,
                                       Result, RunType (..), Trigger, getTrigger,
                                       performResult, resultPrintFailed)
 
 commands :: [ExportType]
 commands = [ Bluetooth.export
-           , Battery.export ]
+           , Battery.export
+           , Cpu.export ]
 
 handlers :: M.Map Command (RunType, Trigger -> IO Result)
 handlers = M.unions $ map fst commands
@@ -51,7 +53,7 @@ handleCommand c t = case M.lookup c handlers of
     Just (Daemon, _) -> runClient "localhost" port (c, t) >>= \case
         Nothing -> putStrLn "No response from daemon" >> exitWith (ExitFailure 47)
         Just result -> return result
-    Nothing -> (putStrLn $ "No handler found for command '" <> c <> "'") >> exitWith (ExitFailure 47)
+    Nothing -> putStrLn ("No handler found for command '" <> c <> "'") >> exitWith (ExitFailure 47)
 
 daemonProcess :: (Command, Trigger) -> IO Result
 daemonProcess (c, t) = case M.lookup c handlers of

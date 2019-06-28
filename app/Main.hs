@@ -44,6 +44,7 @@ main = do
         Right t -> do
             let options = DaemonOptions port InHome False
             ensureDaemonRunning "i3blocks-info-daemon" options daemonProcess
+            putStrLn "hi"
             performResult =<< handleCommand command t
         Left triggerErr -> putStrLn triggerErr >> exitWith (ExitFailure 48)
 

@@ -77,8 +77,8 @@ resultPrintFullColourOkay :: Text -> Colour -> Colour -> Result
 resultPrintFullColourOkay t fore back = defaultResult { text = t, foreColour = Just fore, backColour = Just back }
 
 resultPrintFailed :: Text -> Result
-resultPrintFailed t = defaultResult { text = t, exitStatus = ExitFailure 1 }
+resultPrintFailed t = defaultResult { text = t, exitStatus = ExitFailure 49 }
 resultPrintColourFailed :: Text -> Colour -> Result
-resultPrintColourFailed t c = defaultResult { text = t, foreColour = Just c, exitStatus = ExitFailure 1 }
+resultPrintColourFailed t c = defaultResult { text = t, foreColour = Just c, exitStatus = ExitFailure 49 }
 resultPrintFullColourFailed :: Text -> Colour -> Colour -> Result
 resultPrintFullColourFailed t fore back = defaultResult { text = t, foreColour = Just fore, backColour = Just back, exitStatus = ExitFailure 49 }
